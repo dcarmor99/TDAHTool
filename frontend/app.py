@@ -383,7 +383,7 @@ with tab_explore:
 
         fig, ax = plt.subplots()
         ax.plot(xs, ys, marker="o")
-        ax.set_xlabel("Cálculo #")
+        ax.set_xlabel("Ejecución #")
         ax.set_ylabel("P(TDAH) (%)")
         ax.set_ylim(0, 100)
         if thr_pct is not None:
@@ -410,7 +410,7 @@ with tab_explore:
         fig2, ax2 = plt.subplots()
         ax2.bar(lefts_tdah, ys_tdah, width, label="TDAH")
         ax2.bar(lefts_no, ys_no, width, label="No TDAH")
-        ax2.set_xlabel("Cálculo #")
+        ax2.set_xlabel("Ejecución #")
         ax2.set_ylabel("Probabilidad (%)")
         ax2.set_ylim(0, 100)
         ax2.set_xticks(xs_idx); ax2.set_xticklabels([str(i) for i in xs_idx])
