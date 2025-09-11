@@ -6,19 +6,20 @@ import os
 
 # 1️⃣ Simulación de entrada textual del usuario
 entrada_usuario = {
-    "conducta_status_num": "Diagnosticado pero ya no lo tiene",
-    "sc_age_years": 16,
-    "educacion_especial_status_num": "Tiene plan y recibe servicios de educación especial",
+    "conducta_status_num": "Nunca diagnosticado",
+    "sc_age_years": 5,
+    "a1_age": 35,
+    "educacion_especial_status_num": "Nunca ha tenido plan especial de educación",
     "hcability_num": "This child does not have any health conditions",
-    "birth_yr": 2009,
-    "ansiedad_status_num": "Diagnosticado y lo tiene actualmente",
-    "k7q84_r_num": "Always",
+    "ansiedad_status_num": "Nunca diagnosticado",
+    "k7q84_r_num": "Usually",
+    "k8q31_num": "Sometimes",
     "k7q70_r_num": "Sometimes",
-    "k8q31_num": "Never",
+    "makefriend_num": "No difficulty",
     "sc_sex_bin": "Female",
-    "makefriend_num": "A lot of difficulty",
-    "outdoorswkday_clean_num": "4 or more hours per day"
+    "outdoorswkday_clean_num": "1 hour per day",
 }
+
 
 # 2️⃣ Llamar a la función predictiva del backend
 resultado = predecir_probabilidades(entrada_usuario, include_metrics=True)

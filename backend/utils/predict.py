@@ -5,8 +5,8 @@ import json
 from .preprocessing import preprocess_user_input  # 👈 Importa la función de preprocesamiento
 
 # 📍 Ruta al modelo entrenado (.pkl)
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "model", "modelo_tdahtool_4.pkl")
-METRICS_PATH = os.path.join(os.path.dirname(__file__), "..", "model", "metrics_3.json")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "model", "modelo_tdahtool_5.pkl")
+METRICS_PATH = os.path.join(os.path.dirname(__file__), "..", "model", "metrics_4.json")
 # 🚀 Cargar el modelo una sola vez cuando se importe el archivo
 model = joblib.load(MODEL_PATH)
 

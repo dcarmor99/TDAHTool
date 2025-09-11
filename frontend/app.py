@@ -12,14 +12,22 @@ st.set_page_config(page_title="TDAH Tool — Frontend", layout="centered")
 API_URL = os.getenv("API_URL", "http://backend:8000")
 # Ruta por defecto a la imagen del árbol
 BASE_DIR = Path(__file__).resolve().parent  # .../frontend
-TREE_IMAGE_PATH = BASE_DIR / "img" / "decision_tree_complete.png"
+TREE_IMAGE_PATH = BASE_DIR / "img" / "DT_final.png"
 
 # Variables que usa el backend para predecir (12)
 BACKEND_VARS_12 = [
-    'conducta_status_num', 'sc_age_years', 'birth_yr',
-    'educacion_especial_status_num', 'hcability_num', 'k8q31_num',
-    'k7q70_r_num', 'ansiedad_status_num', 'k7q84_r_num',
-    'makefriend_num', 'sc_sex_bin', 'outdoorswkday_clean_num'
+    "conducta_status_num",
+    "sc_age_years",
+    "a1_age",
+    "educacion_especial_status_num",
+    "hcability_num",
+    "ansiedad_status_num",
+    "k7q84_r_num",
+    "k8q31_num",
+    "k7q70_r_num",
+    "makefriend_num",
+    "sc_sex_bin",
+    "outdoorswkday_clean_num",
 ]
 # -------- Helpers --------
 def api_health() -> bool:
@@ -37,6 +45,7 @@ def get_metrics():
         return r.json()
     except Exception:
         return {}
+
 
 def call_predict(payload: dict, include_metrics: bool = True):
     params = {"include_metrics": include_metrics} if include_metrics else {}
@@ -164,18 +173,32 @@ def render_controls(prefix: str, use_sliders_for_numbers: bool = False, auto_bir
         conducta_status_num = st.selectbox(f"{prefix}Estado de conducta del paciente", OP_CONDUCTA, key=f"{prefix}conducta")
 
         # Numéricos
+# Numéricos
         sc_age_years = (
-            st.slider(f"{prefix}Edad del paciente (años)", 0, 18, 10, 1, key=f"{prefix}age")
+            st.slider(f"{prefix}Edad del paciente (años)", 0, 18, 10, 1, key=f"{prefix}sc_age_years")
             if use_sliders_for_numbers else
-            st.number_input(f"{prefix}Edad del paciente (años)", min_value=0, max_value=18, value=10, step=1, key=f"{prefix}age")
+            st.number_input(f"{prefix}Edad del paciente (años)", min_value=0, max_value=18, value=10, step=1, key=f"{prefix}sc_age_years")
         )
-        current_year = datetime.now().year
-        birth_yr_default = int(current_year - int(sc_age_years)) if auto_birth_from_age else 2015
-        birth_yr = (
-            st.slider(f"{prefix}Año de nacimiento", current_year-25, current_year, birth_yr_default, 1, key=f"{prefix}by")
+
+        # Ajustes recomendados
+        MOTHER_AGE_MIN = 16
+        MOTHER_AGE_MAX = 60   # súbelo si te conviene (p.ej., 80)
+        MOTHER_AGE_DEF = 30   # valor por defecto dentro del rango
+
+        a1_age = (
+            st.slider(
+                f"{prefix}Edad de la madre (años)",
+                MOTHER_AGE_MIN, MOTHER_AGE_MAX, MOTHER_AGE_DEF, 1,
+                key=f"{prefix}a1_age"
+            )
             if use_sliders_for_numbers else
-            st.number_input(f"{prefix}Año de nacimiento", value=birth_yr_default, step=1, key=f"{prefix}by")
+            st.number_input(
+                f"{prefix}Edad de la madre (años)",
+                min_value=MOTHER_AGE_MIN, max_value=MOTHER_AGE_MAX, value=MOTHER_AGE_DEF, step=1,
+                key=f"{prefix}a1_age"
+            )
         )
+
 
         educacion_especial_status_num = st.selectbox(f"{prefix}Estado de servicios de educación especial", OP_EDU_ESP, key=f"{prefix}edu")
 
@@ -219,17 +242,18 @@ def render_controls(prefix: str, use_sliders_for_numbers: bool = False, auto_bir
     return {
         "conducta_status_num": conducta_status_num,                       # str (ES)
         "sc_age_years": int(sc_age_years),                                # int
-        "birth_yr": int(birth_yr),                                        # int
+        "a1_age": int(a1_age),
         "educacion_especial_status_num": educacion_especial_status_num,   # str (ES)
         "hcability_num": hcability_num,                                    # str (EN)
-        "k8q31_num": k8q31_num,                                            # str (EN)
-        "k7q70_r_num": k7q70_r_num,                                        # str (EN)
         "ansiedad_status_num": ansiedad_status_num,                        # str (ES)
         "k7q84_r_num": k7q84_r_num,                                        # str (EN)
+        "k8q31_num": k8q31_num,                                            # str (EN)
+        "k7q70_r_num": k7q70_r_num,                                        # str (EN)
         "makefriend_num": makefriend_num,                                  # str (EN)
         "sc_sex_bin": sc_sex_bin,                                          # str (EN)
         "outdoorswkday_clean_num": outdoorswkday_clean_num,                # str (EN)
     }
+    
 
 # -------- Tabs --------
 tab_form, tab_explore, tab_model = st.tabs(["Formulario", "Explorar", "Modelo"])
