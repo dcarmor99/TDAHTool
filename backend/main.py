@@ -1,44 +1,44 @@
 # main.py
 import json
-from utils.predict import predecir_probabilidades
+from utils.predict import predecir_probabilidades,cargar_metricas, METRICS_PATH, MODEL_PATH, explicar_ruta_lineal
 import os
 
 
 # 1️⃣ Simulación de entrada textual del usuario
 entrada_usuario = {
-    "conducta_status_num": "Diagnosticado pero ya no lo tiene",
-    "sc_age_years": 16,
-    "educacion_especial_status_num": "Tiene plan y recibe servicios de educación especial",
+    "conducta_status_num": "Nunca diagnosticado",
+    "sc_age_years": 5,
+    "a1_age": 35,
+    "educacion_especial_status_num": "Nunca ha tenido plan especial de educación",
     "hcability_num": "This child does not have any health conditions",
-    "birth_yr": 2009,
-    "ansiedad_status_num": "Diagnosticado y lo tiene actualmente",
-    "k7q84_r_num": "Always",
+    "ansiedad_status_num": "Nunca diagnosticado",
+    "k7q84_r_num": "Usually",
+    "k8q31_num": "Sometimes",
     "k7q70_r_num": "Sometimes",
-    "k8q31_num": "Never",
+    "makefriend_num": "No difficulty",
     "sc_sex_bin": "Female",
-    "makefriend_num": "A lot of difficulty",
-    "outdoorswkday_clean_num": "4 or more hours per day"
+    "outdoorswkday_clean_num": "1 hour per day",
 }
+
 
 # 2️⃣ Llamar a la función predictiva del backend
 resultado = predecir_probabilidades(entrada_usuario, include_metrics=True)
 
+metricas = resultado.get("metrics") or cargar_metricas()
+
+# 🧭 Explicación tipo cadena con confianza por nodo
+exp = explicar_ruta_lineal(entrada_usuario)
+
 # 3️⃣ Mostrar el resultado
-print("\n🔍 Resultado de predicción para entrada del usuario:")
 if "error" in resultado:
-    print("❌ Error:", resultado["error"])
+    print("❌ Error en la predicción:", resultado["error"])
 else:
-    print("✅ Predicción (0 = No TDAH, 1 = TDAH):", resultado["prediccion"])
+    print("\n✅ Predicción (0 = No TDAH, 1 = TDAH):", resultado["prediccion"])
     print("🧠 Probabilidad No TDAH:", resultado["probabilidad_no_tdah"], "%")
     print("🧠 Probabilidad TDAH:", resultado["probabilidad_tdah"], "%")
 
-    if "metrics" in resultado:
-        print("\n📊 Métricas del modelo (desde metrics.json):")
-        print(json.dumps(resultado["metrics"], indent=2, ensure_ascii=False))
-    else:
-        print("\n⚠️ No llegaron métricas en la respuesta. Comprobando ruta...")
-        print("Ruta METRICS_PATH:", METRICS_PATH)
-        print("Existe el archivo?:", os.path.exists(METRICS_PATH))
-        # Alternativa: leerlas directamente
-        print("\n📊 Métricas (cargar_metricas()):")
-        print(json.dumps(cargar_metricas(), indent=2, ensure_ascii=False))
+print("\n📊 Métricas del modelo:")
+print(json.dumps(metricas, indent=2, ensure_ascii=False))
+
+print("\n🧭 Explicación de la ruta (JSON):")
+print(json.dumps(exp, indent=2, ensure_ascii=False))

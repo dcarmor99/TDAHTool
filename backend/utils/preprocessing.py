@@ -69,9 +69,9 @@ MAPEOS = {
 
 # Orden de columnas esperadas por el modelo
 ORDERED_COLUMNS = [
-    "conducta_status_num", "sc_age_years", "educacion_especial_status_num",
-    "hcability_num", "birth_yr", "ansiedad_status_num", "k7q84_r_num",
-    "k7q70_r_num", "k8q31_num", "sc_sex_bin", "makefriend_num",
+    "conducta_status_num", "sc_age_years", "a1_age","educacion_especial_status_num",
+    "hcability_num", "ansiedad_status_num", "k7q84_r_num",
+    "k8q31_num", "k7q70_r_num", "makefriend_num","sc_sex_bin", 
     "outdoorswkday_clean_num"
 ]
 
@@ -84,13 +84,13 @@ def preprocess_user_input(data: dict) -> pd.DataFrame:
     data_num = {
         'conducta_status_num': MAPEOS['conducta_status_num'].get(data['conducta_status_num']),
         'sc_age_years': data['sc_age_years'],
-        'birth_yr': data['birth_yr'],
+        'a1_age': data['a1_age'],
         'educacion_especial_status_num': MAPEOS['educacion_especial_status_num'].get(data['educacion_especial_status_num']),
         'hcability_num': MAPEOS['hcability_num'].get(data['hcability_num']),
-        'k8q31_num': MAPEOS['k8q31_num'].get(data['k8q31_num']),
-        'k7q70_r_num': MAPEOS['k7q70_r_num'].get(data['k7q70_r_num']),
         'ansiedad_status_num': MAPEOS['ansiedad_status_num'].get(data['ansiedad_status_num']),
+        'k8q31_num': MAPEOS['k8q31_num'].get(data['k8q31_num']),
         'k7q84_r_num': MAPEOS['k7q84_r_num'].get(data['k7q84_r_num']),
+        'k7q70_r_num': MAPEOS['k7q70_r_num'].get(data['k7q70_r_num']),
         'makefriend_num': MAPEOS['makefriend_num'].get(data['makefriend_num']),
         'sc_sex_bin': MAPEOS['sc_sex_bin'].get(data['sc_sex_bin']),
         'outdoorswkday_clean_num': MAPEOS['outdoorswkday_clean_num'].get(data['outdoorswkday_clean_num'])
