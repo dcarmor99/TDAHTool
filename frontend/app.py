@@ -47,8 +47,12 @@ def get_metrics():
         return {}
 
 
-def call_predict(payload: dict, include_metrics: bool = True):
-    params = {"include_metrics": include_metrics} if include_metrics else {}
+def call_predict(payload: dict, include_metrics: bool = True, include_route: bool = False):
+    params = {}
+    if include_metrics:
+        params["include_metrics"] = True
+    if include_route:
+        params["include_route"] = True
     r = requests.post(f"{API_URL}/predict", json=payload, params=params, timeout=20)
     r.raise_for_status()
     return r.json()
@@ -271,7 +275,7 @@ with tab_form:
 
     if st.button("Calcular (Formulario)", key="F_calc"):
         try:
-            resp = call_predict(payload, include_metrics=include_metrics)
+            resp = call_predict(payload, include_metrics=include_metrics, include_route=True)
             tdah_pct, no_pct = extract_pct(resp)
 
             cls = resp.get("prediccion")
@@ -318,7 +322,85 @@ with tab_form:
                     st.caption(f"**Umbral óptimo**: {pctify(thr)}")
             else:
                 st.info("No se pudieron cargar las métricas.")
+            # === Mostrar ruta del árbol si viene en la respuesta ===
+            ruta = resp.get("explicacion_ruta")
+            if isinstance(ruta, dict):
+                if "error" in ruta:
+                    st.warning(f"No se pudo generar la explicación de ruta: {ruta['error']}")
+                else:
+                    exp = ruta.get("explicacion") or {}
+                    ruta_lineal = exp.get("ruta_lineal")
+                    pasos = exp.get("pasos", [])
+                    hoja = exp.get("hoja", {})
+                    source = exp.get("source", {})
 
+                    st.markdown("### Ruta de decisión del árbol")
+
+                    # Metadatos (tipo y fold)
+                    src_type = source.get("type")
+                    fold = source.get("fold", None)
+                    fold_probs = source.get("fold_probabilities", {})
+                    if src_type:
+                        meta = f"**Origen:** `{src_type}`"
+                        if fold is not None:
+                            meta += f" · **fold**: `{fold}`"
+                        st.caption(meta)
+
+                    # Ruta lineal
+                    if ruta_lineal:
+                        st.code(ruta_lineal)
+
+                    # Pasos del camino (tabla compacta)
+                    if pasos:
+                        st.markdown("**Pasos del camino (nodos)**")
+                        rows = []
+                        for p in pasos:
+                            rows.append({
+                                "feature": p.get("feature"),
+                                "user_value": p.get("user_value"),
+                                "regla": f"{p.get('feature')} {p.get('decision')} {p.get('threshold')}",
+                                "conf_nodo(para clase)": pctify(p.get("node_confidence_for_pred", 0.0)),
+                            })
+                        st.table(rows)
+
+                    # Hoja: pureza (no calibrada) + calibradas (fold y final)
+                    if hoja:
+                        st.markdown("**Hoja alcanzada**")
+                        prob_leaf = hoja.get("node_probs", {}) or {}
+                        p_leaf_no = prob_leaf.get("NoTDAH")
+                        p_leaf_si = prob_leaf.get("TDAH")
+
+                        # Calibradas del fold (si hay)
+                        cal_fold = hoja.get("calibrated_probabilities_fold", None)
+                        # Calibrada final (promedio de folds)
+                        cal_final = hoja.get("calibrated_probabilities_final", None)
+
+                        # Línea 1: pureza (no calibrada)
+                        st.write(
+                            f"ID hoja: `{hoja.get('node_id')}` | "
+                            f"Pureza (no calibrada) → NoTDAH: {pctify(p_leaf_no)}, "
+                            f"TDAH: {pctify(p_leaf_si)} | "
+                            f"Confianza no calibrada: {pctify(hoja.get('node_confidence_for_pred'))}"
+                        )
+
+                        # Línea 2: calibradas del fold
+                        if isinstance(cal_fold, dict):
+                            st.write(
+                                "Probabilidad **calibrada (fold de la ruta)** → "
+                                f"NoTDAH: {pctify(cal_fold.get('NoTDAH'))}, "
+                                f"TDAH: {pctify(cal_fold.get('TDAH'))}"
+                            )
+
+                        # Línea 3: calibrada final (modelo)
+                        if isinstance(cal_final, dict):
+                            st.write(
+                                "Probabilidad **calibrada final (modelo)** → "
+                                f"NoTDAH: {pctify(cal_final.get('NoTDAH'))}, "
+                                f"TDAH: {pctify(cal_final.get('TDAH'))}"
+                            )
+
+                        with st.expander("Explicación completa (JSON)"):
+                            st.json(ruta)
             with st.expander("Respuesta cruda de /predict"):
                 st.json(resp)
 

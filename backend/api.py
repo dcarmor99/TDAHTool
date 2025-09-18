@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Literal
-from .utils.predict import predecir_probabilidades, cargar_metricas
+from .utils.predict import predecir_probabilidades, cargar_metricas, explicar_ruta_lineal
 
 app = FastAPI(title="TDAH Tool API", version="1.0.0")
 
@@ -76,6 +76,7 @@ def predict(
     payload: UserInput,
     include_metrics: bool = Query(False, description="Incluir métricas globales en la respuesta"),
     use_optimal_threshold: bool = Query(False, description="Aplicar también predicción con umbral óptimo si existe"),
+    include_route: bool = Query(False, description="Incluir explicación de la ruta del árbol en la respuesta"),
 ):
     """
     Recibe valores textuales, mapea y predice.
@@ -85,8 +86,22 @@ def predict(
     """
     result = predecir_probabilidades(payload.dict(), include_metrics=include_metrics)
 
+
+
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
+
+
+
+    # (Nuevo) incluir la explicación de la ruta si se solicita
+    if include_route:
+        try:
+            route = explicar_ruta_lineal(payload.dict())
+            result["explicacion_ruta"] = route
+        except Exception as e:
+            # No romper la predicción si la explicación falla: devolvemos el error anidado
+            result["explicacion_ruta"] = {"error": str(e)}
+
 
     if use_optimal_threshold:
         mets = cargar_metricas()

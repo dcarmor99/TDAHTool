@@ -1,6 +1,6 @@
 # main.py
 import json
-from utils.predict import predecir_probabilidades
+from utils.predict import predecir_probabilidades,cargar_metricas, METRICS_PATH, MODEL_PATH, explicar_ruta_lineal
 import os
 
 
@@ -24,22 +24,21 @@ entrada_usuario = {
 # 2️⃣ Llamar a la función predictiva del backend
 resultado = predecir_probabilidades(entrada_usuario, include_metrics=True)
 
+metricas = resultado.get("metrics") or cargar_metricas()
+
+# 🧭 Explicación tipo cadena con confianza por nodo
+exp = explicar_ruta_lineal(entrada_usuario)
+
 # 3️⃣ Mostrar el resultado
-print("\n🔍 Resultado de predicción para entrada del usuario:")
 if "error" in resultado:
-    print("❌ Error:", resultado["error"])
+    print("❌ Error en la predicción:", resultado["error"])
 else:
-    print("✅ Predicción (0 = No TDAH, 1 = TDAH):", resultado["prediccion"])
+    print("\n✅ Predicción (0 = No TDAH, 1 = TDAH):", resultado["prediccion"])
     print("🧠 Probabilidad No TDAH:", resultado["probabilidad_no_tdah"], "%")
     print("🧠 Probabilidad TDAH:", resultado["probabilidad_tdah"], "%")
 
-    if "metrics" in resultado:
-        print("\n📊 Métricas del modelo (desde metrics.json):")
-        print(json.dumps(resultado["metrics"], indent=2, ensure_ascii=False))
-    else:
-        print("\n⚠️ No llegaron métricas en la respuesta. Comprobando ruta...")
-        print("Ruta METRICS_PATH:", METRICS_PATH)
-        print("Existe el archivo?:", os.path.exists(METRICS_PATH))
-        # Alternativa: leerlas directamente
-        print("\n📊 Métricas (cargar_metricas()):")
-        print(json.dumps(cargar_metricas(), indent=2, ensure_ascii=False))
+print("\n📊 Métricas del modelo:")
+print(json.dumps(metricas, indent=2, ensure_ascii=False))
+
+print("\n🧭 Explicación de la ruta (JSON):")
+print(json.dumps(exp, indent=2, ensure_ascii=False))
