@@ -1,0 +1,31 @@
+{
+  "accuracy": 0.9004,
+  "recall_TDAH": 0.6838,
+  "precision_TDAH": 0.5439,
+  "f1_TDAH": 0.6059,
+  "specificity_NoTDAH": 0.9277,
+  "roc_auc": 0.9126,
+  "npv_NoTDAH": 0.9588,
+  "for_NoTDAH": 0.0412,
+  "threshold_optimo": 0.35,
+  "supports": {
+    "total": 6076,
+    "TDAH": 680,
+    "NoTDAH": 5396
+  },
+  "timestamp": "2025-09-10T21:33:07Z",
+  "features_order": [
+    "conducta_status_num",
+    "sc_age_years",
+    "a1_age",
+    "educacion_especial_status_num",
+    "hcability_num",
+    "ansiedad_status_num",
+    "k7q84_r_num",
+    "k8q31_num",
+    "k7q70_r_num",
+    "makefriend_num",
+    "sc_sex_bin",
+    "outdoorswkday_clean_num"
+  ]
+}
